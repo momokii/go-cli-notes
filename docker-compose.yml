@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: kg-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-kg_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-kg_secure_password_change_me}
+      POSTGRES_DB: ${DB_NAME:-knowledge_garden}
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+    ports:
+      - "${DB_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-kg_user} -d ${DB_NAME:-knowledge_garden}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kg-network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: kg-api
+    environment:
+      SERVER_HOST: ${SERVER_HOST:-0.0.0.0}
+      SERVER_PORT: ${SERVER_PORT:-8080}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-kg_user}
+      DB_PASSWORD: ${DB_PASSWORD:-kg_secure_password_change_me}
+      DB_NAME: ${DB_NAME:-knowledge_garden}
+      DB_SSL_MODE: ${DB_SSL_MODE:-disable}
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production}
+      JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION:-15m}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-168h}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      ENV: ${ENV:-development}
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - kg-network
+    volumes:
+      - ./internal:/app/internal
+      - ./cmd:/app/cmd
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  kg-network:
+    driver: bridge

@@ -1,0 +1,59 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+dist/
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.out
+coverage.html
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Keyring tokens (local development)
+.kg/
+
+# Build artifacts
+build/
+tmp/
+
+# Docker volumes (local only)
+docker-data/
+
+# (not very important)
+tests
+deploy
+
+# claude code related
+claude.md
+docs 
+.claude
+.github
+CONTRIBUTING.md
