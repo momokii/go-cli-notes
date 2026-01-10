@@ -513,13 +513,95 @@ go test -v ./...
 
 ### Database Migrations
 
-```bash
-# Run migrations
-docker compose exec api go run ./migrations
+This project uses [Goose](https://github.com/pressly/goose) for database migration management. Migrations are tracked in the `goose_db_version` table and can be run automatically or manually.
 
-# Or manually run SQL files
-psql -h localhost -U kg_user -d kg_db -f migrations/001_init.sql
+**Important:**
+- All migration methods automatically load environment variables from the `.env` file if it exists
+- All migrations are **idempotent** - safe to re-run even if tables already exist
+- Migrations use `IF NOT EXISTS` / `IF EXISTS` to prevent errors
+
+#### For Existing Databases
+
+If you have an existing database (created before the migration system was implemented), use the **bootstrap** command to mark all migrations as applied without running the SQL:
+
+```bash
+go run ./migrations bootstrap
+# or
+./scripts/migrate.sh bootstrap
 ```
+
+This tells the migration system that your database is already up-to-date, so future migrations will run correctly.
+
+#### Local Development
+
+```bash
+# Method 1: Using the helper script (recommended)
+# Works with bash, sh, dash, zsh, etc.
+./scripts/migrate.sh status              # Check migration status
+./scripts/migrate.sh up                  # Apply all pending migrations
+./scripts/migrate.sh down                # Rollback the most recent migration
+./scripts/migrate.sh redo                # Rollback and re-apply the most recent migration
+./scripts/migrate.sh bootstrap           # Mark existing migrations as applied
+
+# Method 2: Using the Makefile
+make migrate-status
+make migrate-up
+make migrate-down
+make migrate-redo
+
+# Method 3: Using Go directly (also auto-loads .env)
+go run ./migrations status
+go run ./migrations up
+go run ./migrations down
+go run ./migrations bootstrap           # For existing databases
+
+# Create a new migration
+./scripts/migrate.sh create add_users_table sql
+```
+
+#### Docker / Production
+
+```bash
+# Migrations run automatically when the container starts
+# They are idempotent - safe to run even if tables already exist
+docker compose up -d
+
+# Skip migrations with environment variable:
+SKIP_MIGRATIONS=true docker compose up -d
+
+# Run migrations manually in running container
+./scripts/docker-migrate.sh status
+./scripts/docker-migrate.sh up
+./scripts/docker-migrate.sh down
+```
+
+**Note:** The migration system is designed to handle existing databases gracefully:
+- Fresh installations run all migrations automatically
+- Existing databases skip already-applied migrations
+- Idempotent SQL prevents errors from duplicate objects
+- Use `bootstrap` command if you set up the database before migrations
+
+#### Migration Files
+
+Migration files are stored in the `migrations/` directory with the naming convention:
+- `YYYYMMDDHHMMSS_description.sql` - Single file with up/down migrations
+
+Each migration file uses Goose's SQL format with `-- +goose Up` and `-- +goose Down` markers:
+
+```sql
+-- +goose Up
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email VARCHAR(255) NOT NULL
+);
+
+-- +goose Down
+DROP TABLE users;
+```
+
+Example:
+- `20250110120000_init_schema.sql`
+- `20250110120001_add_fts.sql`
 
 ## Deployment
 
