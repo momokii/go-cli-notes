@@ -580,6 +580,15 @@ docker compose up -d
 - Use `./scripts/migrate.sh bootstrap` for existing databases
 - Migrations are idempotent - safe to re-run
 
+**Environment Variables for Migrations:**
+- `DATABASE_URL` - Full database connection URL (for NeonDB, Supabase, etc.) - takes precedence
+- `DB_HOST` - Database host (default: localhost)
+- `DB_PORT` - Database port (default: 5432)
+- `DB_USER` - Database user (default: kg_user)
+- `DB_PASSWORD` - Database password (required)
+- `DB_NAME` - Database name (default: knowledge_garden)
+- `DB_SSL_MODE` - SSL mode (default: disable)
+
 #### Migration Files
 
 Migration files are stored in the `migrations/` directory with the naming convention:
@@ -632,23 +641,28 @@ docker compose down
 Set environment variables for production:
 
 ```bash
-# Database
-export KG_DB_HOST=localhost
-export KG_DB_PORT=5432
-export KG_DB_USER=kg_user
-export KG_DB_PASSWORD=secure_password
-export KG_DB_NAME=kg_db
+# Database - Option 1: Full database URL (recommended for NeonDB, Supabase, etc.)
+export DATABASE_URL="postgresql://user:password@host:port/dbname?sslmode=require"
+
+# Database - Option 2: Individual variables (for local PostgreSQL)
+export DB_HOST=localhost
+export DB_PORT=5432
+export DB_USER=kg_user
+export DB_PASSWORD=secure_password
+export DB_NAME=kg_db
 
 # JWT
-export KG_JWT_SECRET=your-secret-key-here
-export KG_JWT_ACCESS_EXPIRATION=3600
-export KG_JWT_REFRESH_EXPIRATION=86400
+export JWT_SECRET=your-secret-key-here
+export JWT_ACCESS_EXPIRATION=3600
+export JWT_REFRESH_EXPIRATION=86400
 
 # Server
-export KG_SERVER_ADDRESS=0.0.0.0:8080
-export KG_SERVER_READ_TIMEOUT=30s
-export KG_SERVER_WRITE_TIMEOUT=30s
+export SERVER_ADDRESS=0.0.0.0:8080
+export SERVER_READ_TIMEOUT=30s
+export SERVER_WRITE_TIMEOUT=30s
 ```
+
+**Note:** If `DATABASE_URL` is set, it takes precedence over individual `DB_*` variables.
 
 ## Troubleshooting
 
@@ -657,6 +671,28 @@ export KG_SERVER_WRITE_TIMEOUT=30s
 **1. "connection refused" error**
 - Ensure PostgreSQL is running
 - Check the database connection string in config
+
+**2. NeonDB / Cloud Database Connection**
+
+For NeonDB, Supabase, or other cloud PostgreSQL services, use the `DATABASE_URL` environment variable:
+
+```bash
+# In .env file
+DATABASE_URL=postgresql://neondb_owner:password@ep-xxx-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+```
+
+Or in docker-compose.yml:
+```yaml
+services:
+  api:
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+```
+
+**Common NeonDB issues:**
+- Make sure to use the "pooler" connection string (not direct host)
+- Include `sslmode=require` in the connection string
+- The connection string should start with `postgresql://` not `postgres://`
 
 **2. "unauthorized" errors**
 - Login again using `./kg-cli login`

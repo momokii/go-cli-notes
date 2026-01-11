@@ -52,7 +52,7 @@ func main() {
 	dbString := getDBString()
 
 	if dbString == "" {
-		log.Fatal("database connection string is required. Set DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME environment variables")
+		log.Fatal("database connection string is required. Set DATABASE_URL, or DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME environment variables")
 	}
 
 	// Normalize directory path
@@ -93,7 +93,15 @@ func main() {
 }
 
 // getDBString constructs the database connection string from environment variables
+// If DATABASE_URL is set, it takes precedence over individual DB_* variables
 func getDBString() string {
+	// Check for DATABASE_URL first (for NeonDB, Supabase, etc.)
+	dbURL := os.Getenv("DATABASE_URL")
+	if dbURL != "" {
+		return dbURL
+	}
+
+	// Fall back to individual DB_* variables
 	host := os.Getenv("DB_HOST")
 	if host == "" {
 		host = "localhost"
@@ -230,6 +238,7 @@ func usage() {
 	fmt.Println("  -allow-missing      Applies missing (out-of-order) migrations")
 	fmt.Println()
 	fmt.Println("Environment Variables:")
+	fmt.Println("  DATABASE_URL        Full database URL (for NeonDB, Supabase, etc.)")
 	fmt.Println("  DB_HOST             Database host (default: localhost)")
 	fmt.Println("  DB_PORT             Database port (default: 5432)")
 	fmt.Println("  DB_USER             Database user (default: kg_user)")

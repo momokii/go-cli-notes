@@ -9,6 +9,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/joho/godotenv"
 	"github.com/momokii/go-cli-notes/internal/api/handler"
 	"github.com/momokii/go-cli-notes/internal/api/middleware"
 	"github.com/momokii/go-cli-notes/internal/api/router"
@@ -19,6 +20,9 @@ import (
 )
 
 func main() {
+	// Try to load .env file if it exists (silent fail if not found)
+	_ = godotenv.Load()
+
 	// Load configuration
 	cfg, err := config.Load()
 	if err != nil {
@@ -44,7 +48,12 @@ func main() {
 	}
 	defer db.Close()
 
-	slog.Info("Connected to database", "host", cfg.Database.Host, "port", cfg.Database.Port)
+	// Log database connection info
+	if cfg.Database.DatabaseURL != "" {
+		slog.Info("Connected to database", "connection", "DATABASE_URL")
+	} else {
+		slog.Info("Connected to database", "host", cfg.Database.Host, "port", cfg.Database.Port)
+	}
 
 	// Initialize repositories
 	repos := repository.NewRepository(db)
