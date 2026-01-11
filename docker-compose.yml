@@ -50,6 +50,12 @@ services:
     volumes:
       - ./internal:/app/internal
       - ./cmd:/app/cmd
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "8080"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
 
 volumes:
   postgres_data:

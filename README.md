@@ -562,24 +562,23 @@ go run ./migrations bootstrap           # For existing databases
 #### Docker / Production
 
 ```bash
-# Migrations run automatically when the container starts
-# They are idempotent - safe to run even if tables already exist
+# 1. Run migrations first (before starting API)
+./scripts/migrate.sh up
+
+# 2. Start services
 docker compose up -d
 
-# Skip migrations with environment variable:
-SKIP_MIGRATIONS=true docker compose up -d
-
-# Run migrations manually in running container
+# Run migrations manually
 ./scripts/docker-migrate.sh status
 ./scripts/docker-migrate.sh up
 ./scripts/docker-migrate.sh down
 ```
 
-**Note:** The migration system is designed to handle existing databases gracefully:
-- Fresh installations run all migrations automatically
-- Existing databases skip already-applied migrations
-- Idempotent SQL prevents errors from duplicate objects
-- Use `bootstrap` command if you set up the database before migrations
+**Note:** Migrations must be run manually before starting the API:
+- API container no longer runs migrations automatically
+- Use `./scripts/migrate.sh up` to apply migrations
+- Use `./scripts/migrate.sh bootstrap` for existing databases
+- Migrations are idempotent - safe to re-run
 
 #### Migration Files
 
