@@ -10,15 +10,15 @@ import (
 
 // Config holds the application configuration
 type Config struct {
-	API        APIConfig        `mapstructure:"api"`
-	Editor     EditorConfig     `mapstructure:"editor"`
+	API         APIConfig         `mapstructure:"api"`
+	Editor      EditorConfig      `mapstructure:"editor"`
 	Preferences PreferencesConfig `mapstructure:"preferences"`
 }
 
 // APIConfig holds API-related configuration
 type APIConfig struct {
-	BaseURL string        `mapstructure:"base_url"`
-	Timeout int           `mapstructure:"timeout"` // in seconds
+	BaseURL string `mapstructure:"base_url"`
+	Timeout int    `mapstructure:"timeout"` // in seconds
 }
 
 // EditorConfig holds editor-related configuration
@@ -28,15 +28,16 @@ type EditorConfig struct {
 
 // PreferencesConfig holds user preferences
 type PreferencesConfig struct {
-	DefaultNoteType    string `mapstructure:"default_note_type"`
-	AutoSaveInterval   int    `mapstructure:"auto_save_interval"` // in seconds
-	Theme              string `mapstructure:"theme"`
+	DefaultNoteType  string `mapstructure:"default_note_type"`
+	AutoSaveInterval int    `mapstructure:"auto_save_interval"` // in seconds
+	Theme            string `mapstructure:"theme"`
 }
 
 // LoadConfig loads configuration from file and environment variables
 func LoadConfig() (*Config, error) {
 	// Set default values
-	viper.SetDefault("api.base_url", "http://localhost:8080")
+	viper.SetDefault("api.base_url", "http://localhost:8080") // for localhost testing
+	// viper.SetDefault("api.base_url", "API_SERVER") // change here for 'prod' server
 	viper.SetDefault("api.timeout", 30)
 	viper.SetDefault("editor.external_editor", os.Getenv("EDITOR"))
 	if viper.GetString("editor.external_editor") == "" {
@@ -56,7 +57,7 @@ func LoadConfig() (*Config, error) {
 	configFile := filepath.Join(configDir, "config.yaml")
 
 	// Create config directory if it doesn't exist
-	if err := os.MkdirAll(configDir, 0755); err != nil {
+	if err := os.MkdirAll(configDir, 0o755); err != nil {
 		return nil, fmt.Errorf("create config dir: %w", err)
 	}
 
@@ -95,7 +96,7 @@ func SaveConfig(config *Config) error {
 	configFile := filepath.Join(configDir, "config.yaml")
 
 	// Create config directory if it doesn't exist
-	if err := os.MkdirAll(configDir, 0755); err != nil {
+	if err := os.MkdirAll(configDir, 0o755); err != nil {
 		return fmt.Errorf("create config dir: %w", err)
 	}
 
