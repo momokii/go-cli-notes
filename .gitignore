@@ -41,7 +41,6 @@ Thumbs.db
 .kg/
 
 # Build artifacts
-build/
 tmp/
 
 # Docker volumes (local only)
@@ -58,3 +57,5 @@ docs
 .github
 CONTRIBUTING.md
 Makefile
+app
+build
