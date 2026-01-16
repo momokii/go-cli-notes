@@ -13,6 +13,89 @@ var tagCmd = &cobra.Command{
 	Short: "Manage tags",
 }
 
+// tagGetCmd gets notes by tag
+var tagGetCmd = &cobra.Command{
+	Use:   "get <id-or-name>",
+	Short: "Get all notes for a tag",
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		tagIdentifier := args[0]
+
+		// Try to parse as UUID first, if that fails, search by name
+		tagID, err := uuid.Parse(tagIdentifier)
+		if err != nil {
+			// Not a UUID, search for tag by name
+			tags, err := apiClient.GetTags()
+			if err != nil {
+				return fmt.Errorf("get tags: %w", err)
+			}
+
+			var foundTagID *uuid.UUID
+			var tagName string
+			for _, tag := range tags {
+				if strings.EqualFold(tag.Name, tagIdentifier) {
+					foundTagID = &tag.ID
+					tagName = tag.Name
+					break
+				}
+			}
+
+			if foundTagID == nil {
+				return fmt.Errorf("tag '%s' not found", tagIdentifier)
+			}
+			tagID = *foundTagID
+
+			// Get notes for this tag
+			notes, err := apiClient.GetTagNotes(tagID)
+			if err != nil {
+				return fmt.Errorf("get notes by tag: %w", err)
+			}
+
+			if len(notes) == 0 {
+				fmt.Printf("Tag '%s' exists but has no notes\n", tagName)
+				return nil
+			}
+
+			fmt.Printf("Tag: %s\n", tagName)
+			fmt.Printf("Found %d note(s):\n\n", len(notes))
+			for _, note := range notes {
+				fmt.Printf("ID: %s\n", note.ID)
+				fmt.Printf("Title: %s\n", note.Title)
+				fmt.Printf("Type: %s\n", note.NoteType)
+				fmt.Printf("Words: %d\n", note.WordCount)
+				fmt.Printf("Created: %s\n", note.CreatedAt.Format("2006-01-02 15:04"))
+				fmt.Println("---")
+			}
+
+			return nil
+		}
+
+		// Valid UUID - get notes directly
+		notes, err := apiClient.GetTagNotes(tagID)
+		if err != nil {
+			return fmt.Errorf("get notes by tag: %w", err)
+		}
+
+		if len(notes) == 0 {
+			fmt.Printf("Tag ID %s exists but has no notes\n", tagID)
+			return nil
+		}
+
+		fmt.Printf("Tag ID: %s\n", tagID)
+		fmt.Printf("Found %d note(s):\n\n", len(notes))
+		for _, note := range notes {
+			fmt.Printf("ID: %s\n", note.ID)
+			fmt.Printf("Title: %s\n", note.Title)
+			fmt.Printf("Type: %s\n", note.NoteType)
+			fmt.Printf("Words: %d\n", note.WordCount)
+			fmt.Printf("Created: %s\n", note.CreatedAt.Format("2006-01-02 15:04"))
+			fmt.Println("---")
+		}
+
+		return nil
+	},
+}
+
 // tagListCmd lists all tags
 var tagListCmd = &cobra.Command{
 	Use:   "list",
@@ -209,6 +292,7 @@ var tagRemoveCmd = &cobra.Command{
 
 func init() {
 	tagCmd.AddCommand(tagListCmd)
+	tagCmd.AddCommand(tagGetCmd)
 	tagCmd.AddCommand(tagCreateCmd)
 	tagCmd.AddCommand(tagUpdateCmd)
 	tagCmd.AddCommand(tagDeleteCmd)

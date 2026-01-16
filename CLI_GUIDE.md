@@ -659,6 +659,58 @@ kg-cli tag remove "programming" 123e4567-e89b-12d3-a456-426614174000
 kg-cli tag remove 123e4567-e89b-12d3-a456-426614174001 123e4567-e89b-12d3-a456-426614174000
 ```
 
+### Get Notes by Tag
+
+Display all notes associated with a specific tag. This is the reverse of `note tags` - instead of showing which tags a note has, this shows which notes have a specific tag.
+
+**Syntax:**
+```bash
+kg-cli tag get <tag-id-or-name>
+```
+
+**Arguments:**
+- `tag-id-or-name` - Tag UUID or tag name (required)
+
+**Examples:**
+```bash
+# Get notes by tag name (recommended)
+kg-cli tag get "programming"
+
+# Get notes by tag ID
+kg-cli tag get 123e4567-e89b-12d3-a456-426614174001
+```
+
+**Example Output:**
+```bash
+$ kg-cli tag get "golang"
+Tag: golang
+Found 3 note(s):
+
+ID: 123e4567-e89b-12d3-a456-426614174000
+Title: Go Fiber Framework Research
+Type: note
+Words: 350
+Created: 2026-01-04 10:30
+---
+ID: 456e7890-e89b-12d3-a456-426614174001
+Title: PostgreSQL Setup in Go
+Type: note
+Words: 200
+Created: 2026-01-03 14:15
+---
+ID: 789e9012-e89b-12d3-a456-426614174002
+Title: Goroutines Best Practices
+Type: idea
+Words: 150
+Created: 2026-01-02 09:45
+---
+```
+
+**Use Cases:**
+- Quickly find all notes related to a specific topic (e.g., all "golang" tagged notes)
+- Review notes in a specific category before starting work
+- Export all notes from a specific tag for backup or sharing
+
 ---
 
 ## Analytics

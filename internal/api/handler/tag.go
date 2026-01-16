@@ -296,6 +296,36 @@ func (h *TagHandler) GetNoteTags(c *fiber.Ctx) error {
 	return sendJSON(c, fiber.StatusOK, fiber.Map{"tags": tags})
 }
 
+// GetTagNotes handles GET /api/v1/tags/:id/notes
+func (h *TagHandler) GetTagNotes(c *fiber.Ctx) error {
+	userIDStr, ok := getUserID(c)
+	if !ok {
+		return sendError(c, fiber.StatusUnauthorized, "Unauthorized")
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return sendError(c, fiber.StatusBadRequest, "Invalid user ID")
+	}
+
+	tagID, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return sendError(c, fiber.StatusBadRequest, "Invalid tag ID")
+	}
+
+	svc, ok := h.tagService.(*service.TagService)
+	if !ok {
+		return sendError(c, fiber.StatusInternalServerError, "Service error")
+	}
+
+	notes, err := svc.GetNotesByTag(c.Context(), userID, tagID)
+	if err != nil {
+		return sendError(c, fiber.StatusNotFound, "Tag not found")
+	}
+
+	return sendJSON(c, fiber.StatusOK, fiber.Map{"notes": notes})
+}
+
 // Helper for string to int conversion
 func strconvParseInt(s string) (int, error) {
 	return strconv.Atoi(s)

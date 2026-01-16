@@ -28,6 +28,7 @@ func Setup(app *fiber.App, h *handler.Handlers, jwtManager any) {
 	tags.Use(middleware.Auth(jwtManager))
 	tags.Get("/", h.Tag.ListTags)
 	tags.Post("/", h.Tag.CreateTag)
+	tags.Get("/:id/notes", h.Tag.GetTagNotes)
 	tags.Get("/:id", h.Tag.GetTag)
 	tags.Put("/:id", h.Tag.UpdateTag)
 	tags.Delete("/:id", h.Tag.DeleteTag)

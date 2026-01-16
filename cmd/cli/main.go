@@ -186,11 +186,18 @@ var statusCmd = &cobra.Command{
 		// Config info
 		fmt.Printf("API URL: %s\n", config.API.BaseURL)
 
-		// Auth status
+		// Auth status - validate with server
 		if authState.IsAuthenticated() {
-			fmt.Println("Status: Authenticated")
-			if authState.Email != "" {
-				fmt.Printf("Email: %s\n", authState.Email)
+			// Check if token is actually valid by calling the server
+			if apiClient.ValidateToken() {
+				fmt.Println("Status: Authenticated")
+				if authState.Email != "" {
+					fmt.Printf("Email: %s\n", authState.Email)
+				}
+			} else {
+				// Token exists but is invalid/expired
+				fmt.Println("Status: Not authenticated (token expired)")
+				fmt.Println("\nYour session has expired. Please run 'kg-cli login' to authenticate.")
 			}
 		} else {
 			fmt.Println("Status: Not authenticated")

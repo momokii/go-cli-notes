@@ -22,9 +22,10 @@ services:
       - kg-network
 
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile.api
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile.api
+    image: kelanach/go-cli-notes-api:latest
     container_name: kg-api
     environment:
       SERVER_HOST: ${SERVER_HOST:-0.0.0.0}

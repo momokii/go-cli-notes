@@ -55,9 +55,28 @@ func (c *APIClient) GetToken() string {
 	return c.token
 }
 
-// IsAuthenticated returns true if the client has a valid token
+// IsAuthenticated returns true if the client has a token (local check only)
 func (c *APIClient) IsAuthenticated() bool {
 	return c.token != ""
+}
+
+// ValidateToken checks if the current token is valid by making a lightweight API call
+// Returns true if token is valid, false if invalid or connection failed
+func (c *APIClient) ValidateToken() bool {
+	if c.token == "" {
+		return false
+	}
+
+	// Use /stats endpoint as a lightweight validation check
+	resp, err := c.makeRequest("GET", "/api/v1/stats", nil, true)
+	if err != nil {
+		// Connection error - treat as not validated
+		return false
+	}
+	defer resp.Body.Close()
+
+	// Token is valid if we get a 200 OK
+	return resp.StatusCode == 200
 }
 
 // makeRequest makes an HTTP request with authentication
@@ -438,6 +457,24 @@ func (c *APIClient) RemoveTagFromNote(noteID, tagID uuid.UUID) error {
 	}
 
 	return decodeResponse(resp, nil)
+}
+
+// GetTagNotes retrieves notes for a specific tag
+func (c *APIClient) GetTagNotes(tagID uuid.UUID) ([]*model.Note, error) {
+	resp, err := c.makeRequest("GET", "/api/v1/tags/"+tagID.String()+"/notes", nil, true)
+	if err != nil {
+		return nil, err
+	}
+
+	var result struct {
+		Notes []*model.Note `json:"notes"`
+	}
+
+	if err := decodeResponse(resp, &result); err != nil {
+		return nil, err
+	}
+
+	return result.Notes, nil
 }
 
 // GetGraph retrieves the knowledge graph

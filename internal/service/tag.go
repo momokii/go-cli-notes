@@ -167,3 +167,19 @@ func (s *TagService) GetByNote(ctx context.Context, userID, noteID uuid.UUID) ([
 
 	return tags, nil
 }
+
+// GetNotesByTag gets all notes for a tag
+func (s *TagService) GetNotesByTag(ctx context.Context, userID, tagID uuid.UUID) ([]*model.Note, error) {
+	// Verify tag ownership
+	_, err := s.tagRepo.FindByID(ctx, userID, tagID)
+	if err != nil {
+		return nil, fmt.Errorf("tag not found: %w", err)
+	}
+
+	notes, err := s.tagRepo.GetNotesByTag(ctx, userID, tagID)
+	if err != nil {
+		return nil, fmt.Errorf("get notes by tag: %w", err)
+	}
+
+	return notes, nil
+}

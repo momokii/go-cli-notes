@@ -318,3 +318,52 @@ func (r *TagRepository) GetByNote(ctx context.Context, noteID uuid.UUID) ([]*mod
 
 	return tags, nil
 }
+
+// GetNotesByTag gets all notes for a tag
+func (r *TagRepository) GetNotesByTag(ctx context.Context, userID, tagID uuid.UUID) ([]*model.Note, error) {
+	query := `
+		SELECT n.id, n.user_id, n.title, n.content, n.note_type, n.word_count, n.reading_time_minutes,
+		       n.is_deleted, n.deleted_at, n.created_at, n.updated_at, n.last_accessed_at, n.access_count, n.metadata
+		FROM notes n
+		INNER JOIN note_tags nt ON n.id = nt.note_id
+		WHERE nt.tag_id = $1 AND n.user_id = $2 AND n.is_deleted = false
+		ORDER BY n.updated_at DESC
+	`
+
+	rows, err := r.db.Pool.Query(ctx, query, tagID, userID)
+	if err != nil {
+		return nil, fmt.Errorf("get notes by tag: %w", err)
+	}
+	defer rows.Close()
+
+	notes := []*model.Note{}
+	for rows.Next() {
+		note := &model.Note{}
+		err := rows.Scan(
+			&note.ID,
+			&note.UserID,
+			&note.Title,
+			&note.Content,
+			&note.NoteType,
+			&note.WordCount,
+			&note.ReadingTimeMinutes,
+			&note.IsDeleted,
+			&note.DeletedAt,
+			&note.CreatedAt,
+			&note.UpdatedAt,
+			&note.LastAccessedAt,
+			&note.AccessCount,
+			&note.Metadata,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("scan note: %w", err)
+		}
+		notes = append(notes, note)
+	}
+
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("iterate notes: %w", rows.Err())
+	}
+
+	return notes, nil
+}

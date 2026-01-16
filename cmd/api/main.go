@@ -19,6 +19,10 @@ import (
 	"github.com/momokii/go-cli-notes/internal/util"
 )
 
+const (
+	API_VERSION = "1.1.0"
+)
+
 func main() {
 	// Try to load .env file if it exists (silent fail if not found)
 	_ = godotenv.Load()
@@ -33,7 +37,7 @@ func main() {
 	// Setup logger
 	setupLogger(cfg)
 
-	slog.Info("Starting Knowledge Garden API", "version", "1.0.0")
+	slog.Info("Starting Knowledge Garden API", "version", API_VERSION)
 
 	// Connect to database
 	db, err := repository.NewDB(
@@ -74,7 +78,7 @@ func main() {
 
 	// Setup Fiber app
 	app := fiber.New(fiber.Config{
-		AppName:      "Knowledge Garden API",
+		AppName:      "Knowledge Garden API " + API_VERSION,
 		ReadTimeout:  cfg.Server.ReadTimeout,
 		WriteTimeout: cfg.Server.WriteTimeout,
 		ErrorHandler: customErrorHandler,
