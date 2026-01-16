@@ -59,5 +59,6 @@ build_platform windows amd64
 
 echo ""
 echo "=== Build Complete ==="
+echo "Version: $VERSION"
 echo "Binaries available in: $DIST_DIR/"
 ls -lh $DIST_DIR/

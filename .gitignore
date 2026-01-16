@@ -54,8 +54,10 @@ deploy
 claude.md
 docs 
 .claude
-.github
 CONTRIBUTING.md
 Makefile
 app
 build
+
+.github/ISSUE_TEMPLATE
+.github/pull_request_template.md

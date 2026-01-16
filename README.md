@@ -39,15 +39,36 @@ A terminal-based Personal Knowledge Management (PKM) system with wiki-style link
 
 ## Quick Start
 
-### Prerequisites
+### Installation
+
+The easiest way to install `kg-cli` is using the web-based installer:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/momokii/go-cli-notes/main/scripts/install.sh | bash
+```
+
+This will:
+- Automatically detect your platform (Linux, macOS, Windows)
+- Download the pre-built binary from GitHub Releases
+- Install to `~/.local/bin` (no sudo required) or `/usr/local/bin`
+- Set up your API configuration (local, cloud, or custom URL)
+
+**Supported Platforms:**
+- Linux (amd64, arm64)
+- macOS (Intel, Apple Silicon)
+- Windows (amd64)
+
+For detailed installation instructions, troubleshooting, and alternative installation methods, see [docs/INSTALL.md](docs/INSTALL.md).
+
+### Development Setup
+
+#### Prerequisites
 
 - **Go**: 1.24 or later
 - **PostgreSQL**: 15 or later
 - **Docker** & **Docker Compose** (optional, for containerized setup)
 
-### Installation
-
-#### Option 1: Using Docker (Recommended)
+#### Option 1: Using Docker (Recommended for Development)
 
 ```bash
 # Clone the repository
