@@ -27,7 +27,7 @@ if [ -f "$CONFIG_FILE" ]; then
     echo -e "${YELLOW}Configuration file already exists at:${NC}"
     echo "  $CONFIG_FILE"
     echo ""
-    read -p "Do you want to overwrite it? [y/N]: " overwrite
+    read -p "Do you want to overwrite it? [y/N]: " overwrite < /dev/tty
     if [[ ! $overwrite =~ ^[Yy]$ ]]; then
         echo "Keeping existing configuration."
         exit 0
@@ -35,38 +35,45 @@ if [ -f "$CONFIG_FILE" ]; then
     echo ""
 fi
 
-echo "Choose your API setup:"
-echo "  1) Local API (http://localhost:8080)"
-echo "     - For self-hosted API running on your machine"
-echo ""
-echo "  2) Cloud API (https://cli-notes-api.kelanach.xyz/)"
-echo "     - Use the hosted cloud service"
-echo ""
-echo "  3) Custom URL"
-echo "     - Specify your own API endpoint"
-echo ""
-read -p "Enter choice [1-3, default: 1]: " choice
+# Check for environment variable first (optional convenience)
+if [ -n "$KG_API_URL" ]; then
+    API_URL="$KG_API_URL"
+    echo -e "${GREEN}Using API URL from environment: $API_URL${NC}"
+else
+    # Show prompt for API setup
+    echo "Choose your API setup:"
+    echo "  1) Local API (http://localhost:8080)"
+    echo "     - For self-hosted API running on your machine"
+    echo ""
+    echo "  2) Cloud API (https://cli-notes-api.kelanach.xyz/)"
+    echo "     - Use the hosted cloud service"
+    echo ""
+    echo "  3) Custom URL"
+    echo "     - Specify your own API endpoint"
+    echo ""
+    read -p "Enter choice [1-3, default: 1]: " choice < /dev/tty
 
-case $choice in
-    1)
-        API_URL="http://localhost:8080"
-        echo -e "${GREEN}Selected: Local API${NC}"
-        ;;
-    2)
-        API_URL="$CLOUD_API_URL"
-        echo -e "${GREEN}Selected: Cloud API${NC}"
-        ;;
-    3)
-        read -p "Enter your API URL: " API_URL
-        # Remove trailing slash if present
-        API_URL="${API_URL%/}"
-        echo -e "${GREEN}Selected: Custom API ($API_URL)${NC}"
-        ;;
-    "")
-        API_URL="http://localhost:8080"
-        echo -e "${YELLOW}No valid choice selected, using default: Local API${NC}"
-        ;;
-esac
+    case $choice in
+        1)
+            API_URL="http://localhost:8080"
+            echo -e "${GREEN}Selected: Local API${NC}"
+            ;;
+        2)
+            API_URL="$CLOUD_API_URL"
+            echo -e "${GREEN}Selected: Cloud API${NC}"
+            ;;
+        3)
+            read -p "Enter your API URL: " API_URL < /dev/tty
+            # Remove trailing slash if present
+            API_URL="${API_URL%/}"
+            echo -e "${GREEN}Selected: Custom API ($API_URL)${NC}"
+            ;;
+        "")
+            API_URL="http://localhost:8080"
+            echo -e "${YELLOW}No valid choice selected, using default: Local API${NC}"
+            ;;
+    esac
+fi
 
 echo ""
 echo -e "${BLUE}Creating configuration file...${NC}"

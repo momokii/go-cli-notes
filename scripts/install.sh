@@ -106,7 +106,7 @@ if ! curl -fsSL "$DOWNLOAD_URL" -o "$TMP_DIR/archive.tar.gz"; then
     echo "  2. Network connection issues"
     echo "  3. GitHub is experiencing issues"
     echo ""
-    read -p "Would you like to install from source using 'go install' instead? [y/N]: " go_install
+    read -p "Would you like to install from source using 'go install' instead? [y/N]: " go_install < /dev/tty
     if [[ $go_install =~ ^[Yy]$ ]]; then
         echo ""
         echo -e "${BLUE}Installing from source using 'go install'...${NC}"
@@ -154,7 +154,8 @@ fi
 
 # Verify installation
 if command -v kg-cli &> /dev/null; then
-    VERSION=$(kg-cli --version 2>/dev/null || echo "unknown")
+    # Extract version from "kg-cli version v1.0.0" format
+    VERSION=$(kg-cli --version 2>/dev/null | awk '{print $NF}' || echo "unknown")
     echo ""
     echo -e "${GREEN}Installation successful!${NC}"
     echo ""
@@ -180,7 +181,7 @@ if [ -f "$CONFIG_FILE" ]; then
     echo -e "${YELLOW}Configuration file already exists:${NC}"
     echo "  $CONFIG_FILE"
     echo ""
-    read -p "Do you want to reconfigure? [y/N]: " reconfig
+    read -p "Do you want to reconfigure? [y/N]: " reconfig < /dev/tty
     if [[ ! $reconfig =~ ^[Yy]$ ]]; then
         echo "Keeping existing configuration."
     else
