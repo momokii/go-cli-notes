@@ -43,10 +43,10 @@ else
     # Show prompt for API setup
     echo "Choose your API setup:"
     echo "  1) Local API (http://localhost:8080)"
-    echo "     - For self-hosted API running on your machine"
+    echo "     - For self-hosted API running on your machine (default setup)"
     echo ""
-    echo "  2) Cloud API (https://cli-notes-api.kelanach.xyz/)"
-    echo "     - Use the hosted cloud service"
+    echo "  2) Cloud API"
+    echo "     - Use our cloud based api"
     echo ""
     echo "  3) Custom URL"
     echo "     - Specify your own API endpoint"
