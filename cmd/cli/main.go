@@ -11,6 +11,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Version is set at build time using ldflags
+var Version = "dev"
+
 // readPassword reads password from terminal without echoing input
 func readPassword(prompt string) (string, error) {
 	fmt.Print(prompt)
@@ -27,8 +30,9 @@ var (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "kg-cli",
-	Short: "Personal Knowledge Garden CLI",
+	Use:     "kg-cli",
+	Short:   "Personal Knowledge Garden CLI",
+	Version: Version,
 	Long: `A terminal-based note-taking application with wiki-style links,
 full-text search, and knowledge graph visualization.`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {

@@ -137,7 +137,7 @@ else
         unzip -q "$TMP_DIR/archive.tar.gz" -d "$TMP_DIR"
         BINARY_FILE="$TMP_DIR/${BINARY_NAME}"
     else
-        tar -xzf "$TMP_DIR/archive.tar.gz" -C "$TMP_DIR
+        tar -xzf "$TMP_DIR/archive.tar.gz" -C "$TMP_DIR"
         BINARY_FILE="$TMP_DIR/$BINARY_NAME"
     fi
 
