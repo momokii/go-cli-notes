@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -338,7 +339,7 @@ func (c *APIClient) DeleteNote(id uuid.UUID) error {
 
 // SearchNotes searches notes using full-text search
 func (c *APIClient) SearchNotes(query string, page, limit int) (*model.SearchResponse, error) {
-	path := fmt.Sprintf("/api/v1/search?q=%s&page=%d&limit=%d", query, page, limit)
+	path := fmt.Sprintf("/api/v1/search?q=%s&page=%d&limit=%d", url.QueryEscape(query), page, limit)
 
 	resp, err := c.makeRequest("GET", path, nil, true)
 	if err != nil {

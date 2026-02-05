@@ -8,6 +8,7 @@ import (
 	"golang.org/x/term"
 
 	"github.com/momokii/go-cli-notes/cmd/cli/client"
+	"github.com/momokii/go-cli-notes/cmd/cli/tui"
 	"github.com/spf13/cobra"
 )
 
@@ -212,6 +213,46 @@ var statusCmd = &cobra.Command{
 	},
 }
 
+// tuiCmd launches the interactive Terminal User Interface
+var tuiCmd = &cobra.Command{
+	Use:   "tui",
+	Short: "Launch interactive Terminal User Interface",
+	Long: `Launch the interactive Terminal User Interface (TUI) for visual note management.
+
+The TUI provides an intuitive, menu-driven interface with:
+- Visual note browsing and management
+- Interactive editing
+- Vim-style navigation (h,j,k,l) + arrow keys
+- Real-time search and filtering
+- Knowledge graph visualization
+
+Authentication:
+- You must be logged in before launching the TUI
+- Use 'kg-cli login' to authenticate
+- Session expiration will auto-exit the TUI gracefully
+
+Navigation:
+- Press '?' anytime to see keyboard shortcuts
+- Use 'q' to quit the TUI
+- Use 'ESC' to go back`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		// Check terminal size
+		ok, width, height := tui.CheckTerminalSize()
+		if !ok {
+			tui.ShowTerminalSizeWarning(width, height)
+			fmt.Print("\nPress Enter to continue anyway...")
+			fmt.Scanln() // Wait for user acknowledgment
+		}
+
+		// Run the TUI
+		if err := tui.Run(apiClient, authState); err != nil {
+			return fmt.Errorf("TUI error: %w", err)
+		}
+
+		return nil
+	},
+}
+
 // Execute adds all child commands to the root command and sets flags appropriately.
 func Execute() error {
 	return rootCmd.Execute()
@@ -223,6 +264,7 @@ func init() {
 	rootCmd.AddCommand(registerCmd)
 	rootCmd.AddCommand(logoutCmd)
 	rootCmd.AddCommand(statusCmd)
+	rootCmd.AddCommand(tuiCmd)
 }
 
 func main() {

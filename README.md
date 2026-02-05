@@ -309,6 +309,42 @@ For comprehensive workflows and best practices, see [WORKFLOWS.md](WORKFLOWS.md)
 ./kg-cli trending --limit 10
 ```
 
+### Terminal User Interface (TUI)
+
+The Knowledge Garden CLI includes an interactive Terminal User Interface (TUI) for a rich, visual experience.
+
+```bash
+# Launch the TUI
+./kg-cli tui
+```
+
+**TUI Features:**
+- **Dashboard**: Overview of your knowledge garden with statistics and recent activity
+- **Note Browser**: Browse, search, and view notes with vim-style navigation
+- **Note Editor**: Create and edit notes directly in the terminal
+- **Tag Manager**: Create, edit, and delete tags
+- **Search**: Full-text search with result highlighting
+- **Activity Feed**: View your recent actions
+- **Knowledge Graph**: ASCII visualization of note connections
+
+**Key Bindings:**
+- `?` - Show help
+- `n` - New note
+- `/` - Search
+- `t` - Tags
+- `a` - Activity
+- `g` - Knowledge graph
+- `j`/`k` - Navigate up/down
+- `Enter` - Open/Select
+- `ESC` - Go back
+- `q` - Quit
+
+**Requirements:**
+- Terminal size: 80x24 minimum
+- Valid authentication session (run `kg-cli login` first)
+
+For detailed documentation, see [docs/TUI_USER_GUIDE.md](docs/TUI_USER_GUIDE.md)
+
 ### Configuration
 
 The CLI stores configuration in `~/.config/kg-cli/config.yaml`:

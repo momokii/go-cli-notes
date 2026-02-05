@@ -1,11 +1,14 @@
 package client
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -114,4 +117,59 @@ func (s *AuthState) ApplyToClient(client *APIClient) {
 	if s.AccessToken != "" {
 		client.SetTokens(s.AccessToken, s.RefreshToken)
 	}
+}
+
+// GetTokenExpiry returns the expiry time of the access token
+// Returns zero time if the token is invalid or cannot be parsed
+func (s *AuthState) GetTokenExpiry() time.Time {
+	if s.AccessToken == "" {
+		return time.Time{}
+	}
+
+	// Parse the token (without verifying signature for getting expiry)
+	// We're just reading the claims, not validating the token
+	parts := strings.Split(s.AccessToken, ".")
+	if len(parts) != 3 {
+		return time.Time{}
+	}
+
+	// Decode the payload (base64url encoded)
+	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
+	if err != nil {
+		return time.Time{}
+	}
+
+	// Parse claims
+	claims := make(map[string]interface{})
+	if err := json.Unmarshal(payload, &claims); err != nil {
+		return time.Time{}
+	}
+
+	// Get exp claim
+	if exp, ok := claims["exp"].(float64); ok {
+		return time.Unix(int64(exp), 0)
+	}
+
+	return time.Time{}
+}
+
+// TimeUntilExpiry returns the duration until the token expires
+// Returns negative duration if already expired
+func (s *AuthState) TimeUntilExpiry() time.Duration {
+	expiry := s.GetTokenExpiry()
+	if expiry.IsZero() {
+		return 0
+	}
+	return time.Until(expiry)
+}
+
+// IsExpiringSoon returns true if the token will expire within the given duration
+func (s *AuthState) IsExpiringSoon(within time.Duration) bool {
+	until := s.TimeUntilExpiry()
+	return until > 0 && until <= within
+}
+
+// IsExpired returns true if the token is already expired
+func (s *AuthState) IsExpired() bool {
+	return s.TimeUntilExpiry() < 0
 }
